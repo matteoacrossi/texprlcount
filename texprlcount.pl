@@ -59,24 +59,49 @@ print "$texcount";
 # > (pdftex.def)             Requested size: 221.3985pt x 120.16223pt.
 #
 
-open(my $in,"<$filename.log") || die "File $filename.log not found. Please compile the .tex file";
+open(my $logfileh,"<$filename.log") || die "File $filename.log not found. Please compile the .tex file";
+open(my $texfileh,"<$filename.tex") || die "File $filename.tex not found.";
 
 local $/; 	# Allows for the whole file to be read into a string (otherwise, 
 			# it would be line-wise)
-my $in2 = <$in>;
-close $in;
+my $logfile = <$logfileh>;
+my $texfile = <$texfileh>;
+
+close $logfileh;
+close $texfileh;
+
+# We strip comments from the tex file
+$texfile =~ s/%[^\n]*//g;
+
 my $imageswordcount = 0;
 
 my @images;
 
-@images = $in2 =~ /(?<=\<use )(.*?)(?=\>)/g;
-my @sizes = $in2 =~ /(?<=Requested size:\s)([\d\.]+)pt\sx\s([\d\.]+)pt./g;
+# Extract the names of images from the log file
+@images = $logfile =~ /(?<=\<use )(.*?)(?=\>)/g;
+
+# Now look in the tex file to check wether they are in a single-column or in a
+# double-column figure environment
+# Here, we assume that the order in the log file is the same as the order in the environments
+
+my @figenv = $texfile =~ /\\begin\{figure(\*?)\}/g;
+
+my @sizes = $logfile =~ /(?<=Requested size:\s)([\d\.]+)pt\sx\s([\d\.]+)pt./g;
 my @ars;
 my @lengths;
-for (my $i=0; $i <= $#sizes; $i= $i+2 ) {
-	my $tmp =nearest(0.001, $sizes[$i] /$sizes[$i+1]);
+
+for (my $i=0; $i <= $#images; $i++) {
+	my $tmp = nearest(0.001, $sizes[2*$i] / $sizes[2*$i+1]);
 	push(@ars,$tmp);
-	push(@lengths,ceil(150 / $tmp + 20));
+	if ($figenv[$i] eq '') { #The environment is plain \begin{figure}
+		push(@lengths,ceil(150 / $tmp + 20));
+	}
+	elsif ($figenv[$i] eq '*') { # The environment is two column \begin{figure*}
+		push(@lengths,ceil(300 / (0.5*$tmp) + 40));
+	}
+	else {
+		die "Error while processing the figure environments";
+	}
 }
 
 for ( @lengths ) {
@@ -85,17 +110,23 @@ for ( @lengths ) {
 
 print "Images\n";
 print "------\n";
-my $ml = max_length(@images);
-printf "%-${ml}s  Aspect ratio   Est. word count\n", "File name";
-print "----------------------------------------------------------------\n";
 
-for (my $i=0; $i <= $#images; $i++) {
-	printf "%-${ml}s  %-13s  %s\n", $images[$i],$ars[$i],$lengths[$i];
+if ( $#images > 0) {
+	my $ml = max_length(@images);
+	printf "%-${ml}s  Aspect ratio   Est. word count   Two-column\n", "File name";
+	print "----------------------------------------------------------------------\n";
+	
+	for (my $i=0; $i <= $#images; $i++) {
+		printf "%-${ml}s  %-13s  %s\t\t\t%s\n", $images[$i],$ars[$i],$lengths[$i],$figenv[$i];
+	}
+	print "\nTotal word count for images: $imageswordcount\n\n";
+}
+else {
+	print "The file doesn't contain images.\n\n";
 }
 
 $totalcount += $imageswordcount;
 
-print "\nTotal word count for images: $imageswordcount\n\n";
 print "Total word count (words + equations + images)\n$totalcount\n";
 
 sub max_length {
