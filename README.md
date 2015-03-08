@@ -26,25 +26,25 @@ Instructions
 ------------
 In order to use texprlcount, do the following
 
-* Make sure that texcount is installed (most tex distributions include it)
-* Tell texcount which parts of the document must be excluded by wrapping the part between the following two comments:
+1. Make sure that texcount is installed (most tex distributions include it)
+2. Tell texcount which parts of the document must be excluded by wrapping the part between the following two comments:
 
-    %TC:ignore ... %TC:endignore
-	
-  For example, the abstract and acknowledgements must be excluded from the word count:
-  
-  	%TC:ignore
-	\begin{abstract}
+        %TC:ignore ... %TC:endignore
+   
+    For example, the abstract and acknowledgements must be excluded from the word count:
+    
+    	%TC:ignore
+    	\begin{abstract}
 		...
-	\end{abstract}
-	%TC:endignore
+        \end{abstract}
+        %TC:endignore
+    
+3. Compile the document with `pdflatex`. Do not delete the `.log` file.
+4. Use texprlcount with the following syntax
 
-* Compile the document with `pdflatex`. Do not delete the `.log` file.
-* Use texprlcount with the following syntax
-
-    texprlcount filename.tex
-
-* Manually handle the situations that are currently not handled by texprlcount
+        texprlcount filename.tex
+        
+5. Manually handle the situations that are currently not handled by texprlcount
 
 NOTE
 ----
