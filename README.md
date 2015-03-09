@@ -1,7 +1,7 @@
 Texprlcount
 ===========
 
-texprlcount is a Perl script that uses texcount to estimate the word count for Physical Review Letters articles (or other Physical Review articles).
+`texprlcount` is a Perl script that uses texcount to estimate the word count for Physical Review Letters articles (or other Physical Review articles).
 
 APS sets a limit of 3500 words for PRL articles and provides a guide for estimating the length of a paper:
 
@@ -42,9 +42,8 @@ In order to use texprlcount, do the following
 3. Compile the document with `pdflatex`. Do not delete the `.log` file.
 4. Use texprlcount with the following syntax
 
-        texprlcount filename.tex
+        texprlcount.pl filename.tex
         
-5. Manually handle the situations that are currently not handled by texprlcount
 
 NOTE
 ----
@@ -53,11 +52,11 @@ texprlcount is offered as a tool for estimating the word count of a tex document
 
 In particular, please note the following
 
-* A number of features are still missing (see below)
-* Embedded graphics, such as tikz code, are not recognized
+* Some features are still missing (see below)
+* Currently, texprlcount doesn't work with included `.tex` files
+* Embedded graphics, such as tikz code, are not recognized. You can overcome this problem by creating a tex file for each tikz image and then include the generated pdf in the main latex file
 
 Missing features
 ----------------
-* Word count for tables
-* Detect single/two-column figures
-* Detect single/two-column equations and aligns
+
+* Detect single/two-column equations and tables
