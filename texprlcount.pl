@@ -23,21 +23,66 @@ my $filename = $ARGV[0];
 $filename =~ s{\.[^.]+$}{};
 
 if (!-e "$filename.tex") {
-	print "The file $filename doesn't exist\n";
+	print "The file $filename.tex doesn't exist\n";
 	exit;
 }
+
+#We open the tex file and the log file
+open(my $texfileh,"<$filename.tex") || die "File $filename.tex not found.";
+open(my $logfileh,"<$filename.log") || die "File $filename.log not found. Please compile the .tex file";
+
+local $/; 	# Allows for the whole file to be read into a string (otherwise, 
+			# it would be line-wise)
+my $logfile = <$logfileh>;
+my $texfile = <$texfileh>;
+
+close $logfileh;
+close $texfileh;
+
+# We strip comments from the tex file
+$texfile =~ s/%[^\n]*//g;
+
+# We count the number of characters in the abstract
+my $abstract;
+($abstract) = $texfile =~ /\\begin\{abstract\}(.*?)\\end\{abstract\}/s;
+
 my $totalcount = 0; # Total word count
 
 # We use texcount for evaluating the total word count given by text, captions, 
 # headers, inline equations (1 eq = 1 word) and display equation (1 eq = 16
 # words)
-my $texcount = `texcount $filename.tex -utf8 -sum=1,1,1,0,0,1,16`;
-
+my $texcount = `texcount $filename.tex -utf8 -sum=1,1,1,0,0,1,0`;
+print "\n";
 print "Words in text, headers and equations\n";
-print "------------------------------------\n\n";
+print "------------------------------------\n";
 
 print "$texcount";
+
 ($totalcount) = $texcount =~ /Sum\scount:\s(\d+)/;
+
+# We now address multiline equations. First, we match the environments that can contain multiline equations: align, split, eqnarray etc
+
+my (@aligns) = $texfile =~ /\\begin\{(equation|align\*?|eqnarray)\}(.*?)\\end\{\1\}/sg;
+
+my $mathlinecount;
+for (my $i = 1; $i <= $#aligns; $i = $i + 2) {
+	$mathlinecount += () = $aligns[$i] =~ /\\\\/g;
+	$mathlinecount++;
+}
+#Now we check for $$ .. $$
+(@aligns) = $texfile =~ /\$\$(.*?)\$\$/sg;
+foreach (@aligns) {
+		$mathlinecount++;
+}
+#And for \[ \]
+(@aligns) = $texfile =~ /\\\[(.*?)\\\]/sg;
+foreach (@aligns) {
+		$mathlinecount++;
+}
+$totalcount += 16*$mathlinecount;
+
+print "Number of displayed math lines: $mathlinecount\n\n";
+
 
 # We now address the image estimated word count. PRL length guide suggests the
 # formula
@@ -58,20 +103,6 @@ print "$texcount";
 # > Package pdftex.def Info: filename.pdf used on input line 313.
 # > (pdftex.def)             Requested size: 221.3985pt x 120.16223pt.
 #
-
-open(my $logfileh,"<$filename.log") || die "File $filename.log not found. Please compile the .tex file";
-open(my $texfileh,"<$filename.tex") || die "File $filename.tex not found.";
-
-local $/; 	# Allows for the whole file to be read into a string (otherwise, 
-			# it would be line-wise)
-my $logfile = <$logfileh>;
-my $texfile = <$texfileh>;
-
-close $logfileh;
-close $texfileh;
-
-# We strip comments from the tex file
-$texfile =~ s/%[^\n]*//g;
 
 my $imageswordcount = 0;
 
