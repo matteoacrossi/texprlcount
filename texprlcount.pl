@@ -45,6 +45,8 @@ $texfile =~ s/%[^\n]*//g;
 # We count the number of characters in the abstract
 my $abstract;
 ($abstract) = $texfile =~ /\\begin\{abstract\}(.*?)\\end\{abstract\}/s;
+$abstract =~ s/\R//g;
+$abstract = length($abstract);
 
 my $totalcount = 0; # Total word count
 
@@ -60,7 +62,12 @@ print "$texcount";
 
 ($totalcount) = $texcount =~ /Sum\scount:\s(\d+)/;
 
-# We now address multiline equations. First, we match the environments that can contain multiline equations: align, split, eqnarray etc
+print "Abstract length: $abstract characters\n\n";
+
+# DISPLAYED MATH
+################
+#
+# We now address displayed (multiline) equations. First, we match the environments that can contain multiline equations: align, split, eqnarray etc
 
 my (@aligns) = $texfile =~ /\\begin\{(equation|align\*?|eqnarray)\}(.*?)\\end\{\1\}/sg;
 
@@ -83,7 +90,26 @@ $totalcount += 16*$mathlinecount;
 
 print "Number of displayed math lines: $mathlinecount\n\n";
 
+# TABLES
+##########
+my (@tables) = $texfile =~ /\\begin\{tabular\}(.*?)\\end\{tabular\}/sg;
+my $tablecount = 0;
+my $tablelinecount = 0;
 
+foreach (@tables) {
+	$tablecount++;
+	$tablelinecount += () = $_ =~ /\\\\/g;
+	$tablelinecount++;
+}
+
+print "Number of tables: $tablecount\n";
+print "Table rows: $tablelinecount\n\n";
+
+$totalcount += 13*$tablecount + 6.5 * $tablelinecount;
+
+# IMAGES
+##########
+#
 # We now address the image estimated word count. PRL length guide suggests the
 # formula
 #
