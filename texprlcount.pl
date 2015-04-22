@@ -13,6 +13,8 @@ use strict;
 use POSIX;
 use Math::Round;
 use warnings;
+use List::MoreUtils 'first_index';
+
 
 if ($#ARGV < 0) {
 	print "Usage: prllength.pl filename\n";
@@ -129,6 +131,9 @@ $totalcount += 13*$tablecount + 6.5 * $tablelinecount;
 # > (pdftex.def)             Requested size: 221.3985pt x 120.16223pt.
 #
 
+print "Images\n";
+print "------\n";
+
 my $imageswordcount = 0;
 
 my @images;
@@ -136,49 +141,58 @@ my @images;
 # Extract the names of images from the log file
 @images = $logfile =~ /(?<=\<use )(.*?)(?=\>)/g;
 
+my @sizes = $logfile =~ /(?<=Requested size:\s)([\d\.]+)pt\sx\s([\d\.]+)pt./g;
+
+my @ars;
+for (my $i=0; $i <= $#images; $i++) {
+    my $tmp = nearest(0.001, $sizes[2*$i] / $sizes[2*$i+1]);
+    push(@ars,$tmp);
+}
+
+
 # Now look in the tex file to check wether they are in a single-column or in a
 # double-column figure environment
 # Here, we assume that the order in the log file is the same as the order in the environments
 
-my @figenv = $texfile =~ /\\begin\{figure(\*?)\}/g;
+my @figenvtype = $texfile =~ /\\begin\{figure(\*?)\}/g;
+my @figenv = $texfile =~ /\\begin\{figure\}(.*?)\\end\{figure\}/gs;
 
-my @sizes = $logfile =~ /(?<=Requested size:\s)([\d\.]+)pt\sx\s([\d\.]+)pt./g;
-my @ars;
 my @lengths;
 
-for (my $i=0; $i <= $#images; $i++) {
-	my $tmp = nearest(0.001, $sizes[2*$i] / $sizes[2*$i+1]);
-	push(@ars,$tmp);
-	if ($figenv[$i] eq '') { #The environment is plain \begin{figure}
-		push(@lengths,ceil(150 / $tmp + 20));
-	}
-	elsif ($figenv[$i] eq '*') { # The environment is two column \begin{figure*}
-		push(@lengths,ceil(300 / (0.5*$tmp) + 40));
-	}
-	else {
-		die "Error while processing the figure environments";
-	}
-}
-
-for ( @lengths ) {
-    $imageswordcount += $_;
-}
-
-print "Images\n";
-print "------\n";
-
 if ( $#images > 0) {
-	my $ml = max_length(@images);
-	printf "%-${ml}s  Aspect ratio   Est. word count   Two-column\n", "File name";
-	print "----------------------------------------------------------------------\n";
-	
-	for (my $i=0; $i <= $#images; $i++) {
-		printf "%-${ml}s  %-13s  %s\t\t\t%s\n", $images[$i],$ars[$i],$lengths[$i],$figenv[$i];
-	}
-	print "\nTotal word count for images: $imageswordcount\n\n";
+    my $ml = max_length(@images);
+    printf "%-${ml}s    Aspect ratio   Est. word count   Two-column\n", "File name";
+    print "----------------------------------------------------------------------\n";
+    
+    for(my $i=0; $i <= $#figenv; $i++) {
+        my @img_in_env = $figenv[$i] =~ /\\includegraphics\[[^\]]*\]{(.*?)}/gs;
+        printf "Figure %s\n", $i + 1;
+        foreach my $imgname (@img_in_env) {
+            my $index = first_index { /$imgname/ } @images;
+            my $tmp = nearest(0.001, $sizes[2*$index] / $sizes[2*$index+1]);
+            push(@ars,$tmp);
+            
+            if ($figenvtype[$i] eq '') { #The environment is plain \begin{figure}
+                push(@lengths,ceil(150 / $tmp + 20));
+            }
+            elsif ($figenvtype[$i] eq '*') { # The environment is two column \begin{figure*}
+                push(@lengths,ceil(300 / (0.5*$tmp) + 40));
+            }
+            else {
+                die "Error while processing the figure environments";
+            }
+            printf "  %-${ml}s  %-13s  %s\t\t\t%s\n", $images[$index],$ars[$index],$lengths[$index],$figenvtype[$i];
+        }
+    }
+    
+    for ( @lengths ) {
+        $imageswordcount += $_;
+    }
+
+    print "\nTotal word count for images: $imageswordcount\n\n";
 }
 else {
-	print "The file doesn't contain images.\n\n";
+    print "The file doesn't contain images.\n\n";
 }
 
 $totalcount += $imageswordcount;
