@@ -5,10 +5,9 @@
 # 
 # https://journals.aps.org/authors/length-guide
 #
-# The TeXcount is used for words and equations, while the aspect ratio of
+# The TeXcount is used for text, tables and equations, while the aspect ratio of
 # figures is obtained from the latex .log file. If the file is not present,
 # an error will be raised
-#
 
 use strict;
 use POSIX;
