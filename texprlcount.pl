@@ -100,6 +100,7 @@ my $tablelinecount = 0;
 foreach (@tables) {
 	$tablecount++;
 	$tablelinecount += () = $_ =~ /\\\\/g;
+	$tablelinecount += () = $_ =~ /\\tabularnewline/g;
 	$tablelinecount++;
 }
 
@@ -155,7 +156,7 @@ for (my $i=0; $i <= $#images; $i++) {
 # Here, we assume that the order in the log file is the same as the order in the environments
 
 my @figenvtype = $texfile =~ /\\begin\{figure(\*?)\}/g;
-my @figenv = $texfile =~ /\\begin\{figure\}(.*?)\\end\{figure\}/gs;
+my @figenv = $texfile =~ /\\begin\{figure\*?\}(.*?)\\end\{figure\*?\}/gs;
 
 my @lengths;
 
@@ -165,7 +166,7 @@ if ( $#images > 0) {
     print "----------------------------------------------------------------------\n";
     
     for(my $i=0; $i <= $#figenv; $i++) {
-        my @img_in_env = $figenv[$i] =~ /\\includegraphics\[[^\]]*\]{(.*?)}/gs;
+        my @img_in_env = $figenv[$i] =~ /\\includegraphics\[[^\]]*\]\{(.*?)\}/gs;
         printf "Figure %s\n", $i + 1;
         foreach my $imgname (@img_in_env) {
             my $index = first_index { /$imgname/ } @images;
