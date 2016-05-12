@@ -70,7 +70,7 @@ print "Abstract length: $abstract characters\n\n";
 #
 # We now address displayed (multiline) equations. First, we match the environments that can contain multiline equations: align, split, eqnarray etc
 
-my (@aligns) = $texfile =~ /\\begin\{(equation|align\*?|eqnarray)\}(.*?)\\end\{\1\}/sg;
+my (@aligns) = $texfile =~ /\\begin\{(equation|align\*?|eqnarray|gather)\}(.*?)\\end\{\1\}/sg;
 
 my $mathlinecount;
 for (my $i = 1; $i <= $#aligns; $i = $i + 2) {
@@ -139,7 +139,7 @@ my $imageswordcount = 0;
 my @images;
 
 # Extract the names of images from the log file
-@images = $logfile =~ /(?<=\<use )(.*?)(?=\>)/g;
+@images = $logfile =~ /\<use (.*?)\>/g;
 
 my @sizes = $logfile =~ /(?<=Requested size:\s)([\d\.]+)pt\sx\s([\d\.]+)pt./g;
 
