@@ -8,11 +8,10 @@
 # The TeXcount is used for text, tables and equations, while the aspect ratio of
 # figures is obtained from the latex .log file. If the file is not present,
 # an error will be raised
-use utf8;
 use strict;
+use warnings;
 use POSIX;
 use Math::Round;
-use warnings;
 use List::MoreUtils 'first_index';
 
 if ($#ARGV < 0) {
@@ -146,28 +145,29 @@ print "------\n";
 my $imageswordcount = 0;
 
 my @images;
+my @sizes;
 
 # Extract the names of images from the log file
-@images = $logfile =~ /\<use\s(.*?)\>/g;
+@images = $logfile =~ /\<use (.*?)\>/g;
 
-my @sizes = $logfile =~ /(?<=Requested size:\s)([\d\.]+)pt\sx\s([\d\.]+)pt./g;
+if ($#images >= 0) {
+    @sizes= $logfile =~ /Requested size:\s([\d\.]+)pt\sx\s([\d\.]+)pt/g;
 
-my @ars;
-for (my $i=0; $i <= $#images; $i++) {
-    my $tmp = nearest(0.001, $sizes[2*$i] / $sizes[2*$i+1]);
-    push(@ars,$tmp);
-}
+    my @ars;
+    # for (my $i=0; $i <= $#images; $i++) {
+    #     my $tmp = nearest(0.001, $sizes[2*$i] / $sizes[2*$i+1]);
+    #     push(@ars,$tmp);
+    # }
 
-# Now look in the tex file to check wether they are in a single-column or in a
-# double-column figure environment
-# Here, we assume that the order in the log file is the same as the order in the environments
+    # Now look in the tex file to check wether they are in a single-column or in a
+    # double-column figure environment
+    # Here, we assume that the order in the log file is the same as the order in the environments
 
-my @figenvtype = $texfile =~ /\\begin\{figure(\*?)\}/g;
-my @figenv = $texfile =~ /\\begin\{figure\}(.*?)\\end\{figure\}/gs;
+    my @figenvtype = $texfile =~ /\\begin\{figure(\*?)\}/g;
+    my @figenv = $texfile =~ /\\begin\{figure\}(.*?)\\end\{figure\}/gs;
 
-my @lengths;
+    my @lengths;
 
-if ( $#images > 0) {
     my $ml = max_length(@images);
     printf "%-${ml}s    Aspect ratio   Est. word count   Two-column\n", "File name";
     print "----------------------------------------------------------------------\n";
