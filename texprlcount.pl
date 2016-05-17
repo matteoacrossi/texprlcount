@@ -8,13 +8,12 @@
 # The TeXcount is used for text, tables and equations, while the aspect ratio of
 # figures is obtained from the latex .log file. If the file is not present,
 # an error will be raised
-
+use utf8;
 use strict;
 use POSIX;
 use Math::Round;
 use warnings;
 use List::MoreUtils 'first_index';
-
 
 if ($#ARGV < 0) {
 	print "Usage: prllength.pl filename\n";
@@ -54,7 +53,17 @@ my $totalcount = 0; # Total word count
 # We use texcount for evaluating the total word count given by text, captions, 
 # headers, inline equations (1 eq = 1 word) and display equation (1 eq = 16
 # words)
-my $texcount = `texcount $filename.tex -utf8 -sum=1,1,1,0,0,1,0`;
+
+# We create a temporary rule file to tell texcount to exclude abstract and acknowledgments from the count
+
+open(my $tmp, '>', 'tcrules');
+print $tmp "\%group abstract 0 0\n\%group acknowledgments 0 0";
+close $tmp;
+
+my $texcount = `texcount $filename.tex -opt=tcrules -utf8 -sum=1,1,1,0,0,1,0`;
+
+unlink 'tcrules';
+
 print "\n";
 print "Words in text, headers and equations\n";
 print "------------------------------------\n";
@@ -139,7 +148,7 @@ my $imageswordcount = 0;
 my @images;
 
 # Extract the names of images from the log file
-@images = $logfile =~ /\<use (.*?)\>/g;
+@images = $logfile =~ /\<use\s(.*?)\>/g;
 
 my @sizes = $logfile =~ /(?<=Requested size:\s)([\d\.]+)pt\sx\s([\d\.]+)pt./g;
 
@@ -148,7 +157,6 @@ for (my $i=0; $i <= $#images; $i++) {
     my $tmp = nearest(0.001, $sizes[2*$i] / $sizes[2*$i+1]);
     push(@ars,$tmp);
 }
-
 
 # Now look in the tex file to check wether they are in a single-column or in a
 # double-column figure environment
