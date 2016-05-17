@@ -13,25 +13,40 @@ use warnings;
 use POSIX;
 use Math::Round;
 use List::MoreUtils 'first_index';
+use File::Temp qw/ tempdir /;
+use File::Basename;
 
 if ($#ARGV < 0) {
 	print "Usage: prllength.pl filename\n";
 	exit;
 }
-my $filename = $ARGV[0];
-$filename =~ s{\.[^.]+$}{};
 
-if (!-e "$filename.tex") {
-	print "The file $filename.tex doesn't exist\n";
+my $filename = $ARGV[0];
+
+(my $name, my $path, my $suffix) = fileparse($filename, ".tex");
+
+chdir $path;
+
+if (!-e "$name.tex") {
+	print "The file $name.tex doesn't exist\n";
 	exit;
 }
 
 #We open the tex file and the log file
-open(my $texfileh,"<$filename.tex") || die "File $filename.tex not found.";
-open(my $logfileh,"<$filename.log") || die "File $filename.log not found. Please compile the .tex file";
+open(my $texfileh,"<$name.tex") || die "File $path/$name.tex not found.";
+my $logfileh;
+unless(open($logfileh,"<$name.log")) {
+    print "$name.log file not found, compiling the texfile...\n";
+
+my $tmpdir = tempdir( CLEANUP => 1 );
+`pdflatex -output-directory=$tmpdir $name`;
+open($logfileh,"<$tmpdir/$name.log") || die "File $name.log not found. There were problems during the compilation.";
+}
+
 
 local $/; 	# Allows for the whole file to be read into a string (otherwise, 
 			# it would be line-wise)
+
 my $logfile = <$logfileh>;
 my $texfile = <$texfileh>;
 
@@ -59,7 +74,7 @@ open(my $tmp, '>', 'tcrules');
 print $tmp "\%group abstract 0 0\n\%group acknowledgments 0 0";
 close $tmp;
 
-my $texcount = `texcount $filename.tex -opt=tcrules -utf8 -sum=1,1,1,0,0,1,0`;
+my $texcount = `texcount $name.tex -opt=tcrules -utf8 -sum=1,1,1,0,0,1,0`;
 
 unlink 'tcrules';
 
@@ -173,7 +188,7 @@ if ($#images >= 0) {
     print "----------------------------------------------------------------------\n";
     
     for(my $i=0; $i <= $#figenv; $i++) {
-        my @img_in_env = $figenv[$i] =~ /\\includegraphics\[[^\]]*\]{(.*?)}/gs;
+        my @img_in_env = $figenv[$i] =~ /\\includegraphics(?:\[[^\]]*\])?\{(.*?)\}/gs;
         printf "Figure %s\n", $i + 1;
         foreach my $imgname (@img_in_env) {
             my $index = first_index { /$imgname/ } @images;
