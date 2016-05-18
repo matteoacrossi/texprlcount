@@ -187,7 +187,7 @@ if ($#images >= 0) {
 
     my $ml = max_length(@images);
     printf "%-${ml}s    Aspect ratio   Est. word count   Two-column\n", "File name";
-    print "----------------------------------------------------------------------\n";
+    printf "%${ml}.${ml}s-----------------------------------------------\n", "---------------------------------------------------";
     
     for(my $i=0; $i <= $#figenv; $i++) {
         my @img_in_env = $figenv[$i] =~ /\\includegraphics(?:\[[^\]]*\])?\{(.*?)\}/gs;
@@ -206,7 +206,7 @@ if ($#images >= 0) {
             else {
                 die "Error while processing the figure environments";
             }
-            printf "  %-${ml}s  %-13s  %s\t\t\t%s\n", $images[$index],$ars[$index],$lengths[$index],$figenvtype[$i];
+            printf "  %-${ml}s  %12.2f   %15d   %s\n", $images[$index],$ars[$index],$lengths[$index],$figenvtype[$i];
         }
     }
     
