@@ -8,6 +8,7 @@
 # The TeXcount is used for text, tables and equations, while the aspect ratio of
 # figures is obtained from the latex .log file. If the file is not present,
 # an error will be raised
+
 use strict;
 use warnings;
 use POSIX;
@@ -123,6 +124,7 @@ my $tablelinecount = 0;
 foreach (@tables) {
 	$tablecount++;
 	$tablelinecount += () = $_ =~ /\\\\/g;
+	$tablelinecount += () = $_ =~ /\\tabularnewline/g;
 	$tablelinecount++;
 }
 
