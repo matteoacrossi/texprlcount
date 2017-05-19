@@ -125,6 +125,8 @@ foreach (@tables) {
 	$tablecount++;
 	$tablelinecount += () = $_ =~ /\\\\/g;
 	$tablelinecount += () = $_ =~ /\\tabularnewline/g;
+	$tablelinecount -= () = $_ =~ /\\hline[\s]*$/g;
+	$tablelinecount -= () = $_ =~ /\\\\[\s]*$/g;
 	$tablelinecount++;
 }
 
