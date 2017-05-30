@@ -55,7 +55,7 @@ close $logfileh;
 close $texfileh;
 
 # We strip comments from the tex file
-$texfile =~ s/%[^\n]*//g;
+$texfile =~ s/[^\\]%[^\n]*//g;
 
 # We count the number of characters in the abstract
 my $abstract;
@@ -125,6 +125,8 @@ foreach (@tables) {
 	$tablecount++;
 	$tablelinecount += () = $_ =~ /\\\\/g;
 	$tablelinecount += () = $_ =~ /\\tabularnewline/g;
+	$tablelinecount -= () = $_ =~ /\\hline[\s]*$/g;
+	$tablelinecount -= () = $_ =~ /\\\\[\s]*$/g;
 	$tablelinecount++;
 }
 
