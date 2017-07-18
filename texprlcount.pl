@@ -183,7 +183,7 @@ if ($#images >= 0) {
     # Here, we assume that the order in the log file is the same as the order in the environments
 
     my @figenvtype = $texfile =~ /\\begin\{figure(\*?)\}/g;
-    my @figenv = $texfile =~ /\\begin\{figure\}(.*?)\\end\{figure\}/gs;
+    my @figenv = $texfile =~ /\\begin\{figure(.*?)\\end\{figure/gs;
 
     my @lengths;
 
