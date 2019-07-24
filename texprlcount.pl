@@ -188,7 +188,7 @@ if ($#images >= 0) {
     my @lengths;
 
     my $ml = max_length(@images);
-    printf "%-${ml}s    Aspect ratio (W/H)   Est. word count   Two-column\n", "File name";
+    printf "%-${ml}s    Aspect ratio   Est. word count   Two-column\n", "File name";
     printf "%${ml}.${ml}s-----------------------------------------------\n", "---------------------------------------------------";
     
     for(my $i=0; $i <= $#figenv; $i++) {
@@ -196,8 +196,7 @@ if ($#images >= 0) {
         printf "Figure %s\n", $i + 1;
         foreach my $imgname (@img_in_env) {
             my $index = first_index { /$imgname/ } @images;
-            # Aspect ratio
-            my $tmp = nearest(0.001, $sizes[2*$index+1] / $sizes[2*$index]);
+            my $tmp = nearest(0.001, $sizes[2*$index] / $sizes[2*$index+1]);
             push(@ars,$tmp);
             
             if ($figenvtype[$i] eq '') { #The environment is plain \begin{figure}
