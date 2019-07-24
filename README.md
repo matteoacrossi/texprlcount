@@ -3,7 +3,7 @@ Texprlcount
 
 `texprlcount` is a Perl script that uses texcount to estimate the word count for Physical Review Letters articles (or other Physical Review articles).
 
-APS sets a limit of 3500 words for PRL articles and provides a guide for estimating the length of a paper:
+APS sets a limit of 3750 words for PRL articles and provides a guide for estimating the length of a paper:
 
 https://journals.aps.org/authors/length-guide
 
