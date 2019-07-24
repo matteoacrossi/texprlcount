@@ -55,7 +55,7 @@ close $logfileh;
 close $texfileh;
 
 # We strip comments from the tex file
-$texfile =~ s/%[^\n]*//g;
+$texfile =~ s/[^\\]%[^\n]*//g;
 
 # We count the number of characters in the abstract
 my $abstract;
@@ -125,6 +125,8 @@ foreach (@tables) {
 	$tablecount++;
 	$tablelinecount += () = $_ =~ /\\\\/g;
 	$tablelinecount += () = $_ =~ /\\tabularnewline/g;
+	$tablelinecount -= () = $_ =~ /\\hline[\s]*$/g;
+	$tablelinecount -= () = $_ =~ /\\\\[\s]*$/g;
 	$tablelinecount++;
 }
 
@@ -181,7 +183,7 @@ if ($#images >= 0) {
     # Here, we assume that the order in the log file is the same as the order in the environments
 
     my @figenvtype = $texfile =~ /\\begin\{figure(\*?)\}/g;
-    my @figenv = $texfile =~ /\\begin\{figure\}(.*?)\\end\{figure\}/gs;
+    my @figenv = $texfile =~ /\\begin\{figure(.*?)\\end\{figure/gs;
 
     my @lengths;
 
