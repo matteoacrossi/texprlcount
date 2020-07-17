@@ -42,7 +42,7 @@ Current limitations
 -------------------
 
 * Currently, texprlcount doesn't work with included `.tex` files
-* It can't detect single/two-column equations and tables
+* It can't distinguish between single and two-column equations and tables
 * It can't detect whether multiple image files in the same figure environment are placed side by side or in column (the length check tool provided by APS doesn't either, by the way). A single pdf per figure is recommended
 * Some multiline equation environment may not be detected correctly (please check the number of reported equation lines)
 * Embedded graphics, such as `tikz` code, are not recognized. You can overcome this problem by creating a tex file for each `tikz` image and then include the generated pdf in the main LaTeX file
