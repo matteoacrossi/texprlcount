@@ -26,12 +26,16 @@ Usage
 ------------
 In order to use `texprlcount`, do the following
 
-1. Make sure that `texcount` is installed (most TeX distributions include it)
-2. Use `texprlcount` with the following syntax
+1. Make sure that `texcount` is installed (most TeX distributions include it) and `Math::Round module` perl module. They may be installed by e.g., `apt install texlive-extra-utils libmath-round-perl` on debian sytems.
+2. Fetch the `texprlcount` script, e.g.,
 
-        texprlcount.pl filename.tex
+         wget https://raw.githubusercontent.com/matteoacrossi/texprlcount/master/texprlcount.pl
 
-3. `texprlcount` looks for the `filename.log` file for extracting information on images. If the file is not present, `texprlcount` will compile the `.tex` file with `pdflatex` in a temporary folder. If your file requires special instructions for compiling, please compile it and make sure the log file is present in the file directory.
+4. Use `texprlcount` with the following syntax
+
+        perl texprlcount.pl filename.tex
+
+4. `texprlcount` looks for the `filename.log` file for extracting information on images. If the file is not present, `texprlcount` will compile the `.tex` file with `pdflatex` in a temporary folder. If your file requires special instructions for compiling, please compile it and make sure the log file is present in the file directory.
 
 NOTE
 ----
