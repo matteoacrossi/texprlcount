@@ -2,7 +2,7 @@
 #
 # This script estimates the word count of a .tex file according to the PRL
 # guidelines for length, available at
-# 
+#
 # https://journals.aps.org/authors/length-guide
 #
 # The TeXcount is used for text, tables and equations, while the aspect ratio of
@@ -42,16 +42,16 @@ unless(open($logfileh,"<$name.log")) {
 my $tmpdir = tempdir( CLEANUP => 1 );
 `pdflatex -interaction=nonstopmode -output-directory=$tmpdir $name`;
 my $fail = (`echo $?` != 0);
-if ($fail) { 
+if ($fail) {
   my $cat = `cat $tmpdir/$name.log`;
   printf($cat);
-  die "Compilation failed.";
+  die "LaTeX compilation failed. Check input .tex file.";
 }
 open($logfileh,"<$tmpdir/$name.log") || die "File $name.log not found. There were problems during the compilation.";
 }
 
 
-local $/; 	# Allows for the whole file to be read into a string (otherwise, 
+local $/; 	# Allows for the whole file to be read into a string (otherwise,
 			# it would be line-wise)
 
 my $logfile = <$logfileh>;
@@ -71,7 +71,7 @@ $abstract = length($abstract);
 
 my $totalcount = 0; # Total word count
 
-# We use texcount for evaluating the total word count given by text, captions, 
+# We use texcount for evaluating the total word count given by text, captions,
 # headers, inline equations (1 eq = 1 word) and display equation (1 eq = 16
 # words)
 
@@ -196,7 +196,7 @@ if ($#images >= 0) {
     my $ml = max_length(@images);
     printf "%-${ml}s    Aspect ratio (W/H)  Est. word count   Two-column\n", "File name";
     printf "%${ml}.${ml}s-----------------------------------------------\n", "---------------------------------------------------";
-    
+
     for(my $i=0; $i <= $#figenv; $i++) {
         my @img_in_env = $figenv[$i] =~ /\\includegraphics(?:\[[^\]]*\])?\{(.*?)\}/gs;
         printf "Figure %s\n", $i + 1;
@@ -205,7 +205,7 @@ if ($#images >= 0) {
             # Aspect ratio
             my $tmp = nearest(0.001, $sizes[2*$index] / $sizes[2*$index+1]);
             push(@ars,$tmp);
-            
+
             if ($figenvtype[$i] eq '') { #The environment is plain \begin{figure}
                 push(@lengths,ceil(150 / $tmp + 20));
             }
@@ -218,7 +218,7 @@ if ($#images >= 0) {
             printf "  %-${ml}s  %12.2f   %15d   %s\n", $images[$index],$ars[$index],$lengths[$index],$figenvtype[$i];
         }
     }
-    
+
     for ( @lengths ) {
         $imageswordcount += $_;
     }
