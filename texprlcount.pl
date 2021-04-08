@@ -40,7 +40,13 @@ unless(open($logfileh,"<$name.log")) {
     print "$name.log file not found, compiling the texfile...\n";
 
 my $tmpdir = tempdir( CLEANUP => 1 );
-`pdflatex -output-directory=$tmpdir $name`;
+`pdflatex -interaction=nonstopmode -output-directory=$tmpdir $name`;
+my $fail = (`echo $?` != 0);
+if ($fail) { 
+  my $cat = `cat $tmpdir/$name.log`;
+  printf($cat);
+  die "Compilation failed.";
+}
 open($logfileh,"<$tmpdir/$name.log") || die "File $name.log not found. There were problems during the compilation.";
 }
 
