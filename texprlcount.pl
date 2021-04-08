@@ -18,7 +18,7 @@ use File::Temp qw/ tempdir /;
 use File::Basename;
 
 if ($#ARGV < 0) {
-	print "Usage: prllength.pl filename\n";
+	print "Usage: texprlcount.pl file.tex\n";
 	exit;
 }
 
@@ -29,8 +29,7 @@ my $filename = $ARGV[0];
 chdir $path;
 
 if (!-e "$name.tex") {
-	print "The file $name.tex doesn't exist\n";
-	exit;
+	die "The file $name.tex doesn't exist\n";
 }
 
 #We open the tex file and the log file
