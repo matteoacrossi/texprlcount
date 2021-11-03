@@ -12,10 +12,33 @@
 use strict;
 use warnings;
 use POSIX;
-use Math::Round;
-use List::MoreUtils 'first_index';
 use File::Temp qw/ tempdir /;
 use File::Basename;
+
+# Rounds the number(s) to the nearest multiple of the target value.
+# Adapted from https://metacpan.org/dist/Math-Round/source/Round.pm
+sub nearest {
+    my $targ = abs(shift);
+    my @res  = map {
+        if ($_ >= 0) { $targ * int(($_ + 0.5 * $targ) / $targ); }
+        else { $targ * POSIX::ceil(($_ - 0.5 * $targ) / $targ); }
+    } @_;
+
+    return (wantarray) ? @res : $res[0];
+}
+
+# Returns the index of the first element in the list for which the criterion in the block is true.
+# Adapted from https://metacpan.org/dist/List-MoreUtils/source/lib/List/MoreUtils/PP.pm
+sub firstidx (&@)
+{
+    my $f = shift;
+    foreach my $i (0 .. $#_)
+    {
+        local *_ = \$_[$i];
+        return $i if $f->();
+    }
+    return -1;
+}
 
 if ($#ARGV < 0) {
 	print "Usage: texprlcount.pl file.tex\n";
@@ -200,7 +223,7 @@ if ($#images >= 0) {
         my @img_in_env = $figenv[$i] =~ /\\includegraphics(?:\[[^\]]*\])?\{(.*?)\}/gs;
         printf "Figure %s\n", $i + 1;
         foreach my $imgname (@img_in_env) {
-            my $index = first_index { /$imgname/ } @images;
+            my $index = firstidx { /$imgname/ } @images;
             # Aspect ratio
             my $tmp = nearest(0.001, $sizes[2*$index] / $sizes[2*$index+1]);
             push(@ars,$tmp);
