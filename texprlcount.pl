@@ -83,7 +83,7 @@ close $logfileh;
 close $texfileh;
 
 # We strip comments from the tex file
-$texfile =~ s/[^\\]%[^\n]*//g;
+$texfile =~ s/(?<!\\)%.*//g;
 
 # We count the number of characters in the abstract
 my $abstract;
