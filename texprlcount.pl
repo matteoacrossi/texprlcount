@@ -122,7 +122,7 @@ print "Abstract length: $abstract characters\n\n";
 #
 # We now address displayed (multiline) equations. First, we match the environments that can contain multiline equations: align, split, eqnarray etc
 
-my (@aligns) = $texfile =~ /\\begin\{(equation|align\*?|eqnarray|gather)\}(.*?)\\end\{\1\}/sg;
+my (@aligns) = $texfile =~ /\\begin\{(equation|align\*?|eqnarray|gather|multline)\}(.*?)\\end\{\1\}/sg;
 
 my $mathlinecount;
 for (my $i = 1; $i <= $#aligns; $i = $i + 2) {
